@@ -1,0 +1,45 @@
+<project name="MyProj">
+    <property name="src.dir" location="src"/>
+    <property name="build.dir" location="build"/>
+    <property name="classes.dir" location="${build.dir}/classes"/>
+    <property name="web.dir" location="${src.dir}/main/webapp"/>
+    <property name="lib.dir" location="lib"/>
+    
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    </path>
+    
+    <target name="compile">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" includeAntRuntime="false">
+            <classpath>
+                <path refid="classpath"/>
+            </classpath>
+        </javac>
+    </target>
+     
+    <target name="build" depends="compile">
+        <war destfile = "lab3.war" webxml = "${web.dir}/WEB-INF/web.xml">
+            <fileset dir = "${web.dir}/web-content">
+                <include name = "**/*.*"/>
+            </fileset>      
+            <classes dir = "${classes.dir}"/>
+        </war>
+    </target>
+     
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+     
+    <target name="test" depends="build">
+     
+    </target>
+     
+    <target name="scp" depends="build">
+     
+    </target>
+     
+    <target name="report" depends="test">
+     
+    </target>
+</project>
