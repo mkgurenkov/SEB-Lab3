@@ -12,8 +12,14 @@
     </path>
         
     <target name="compile">
-        <mkdir dir="${classes.dir}"/>
-        <javac target="17" source="17" srcdir="${src.dir}" destdir="${classes.dir}" includeAntRuntime="false">
+        <mkdir dir="${classes.dir}/main"/>
+        <mkdir dir="${classes.dir}/test"/>
+        <javac target="17" source="17" srcdir="${src.dir}/main" destdir="${classes.dir}/main" includeAntRuntime="false">
+            <classpath>
+                <path refid="classpath"/>
+            </classpath>
+        </javac>
+        <javac target="17" source="17" srcdir="${src.dir}/test" destdir="${classes.dir}/test" includeAntRuntime="false">
             <classpath>
                 <path refid="classpath"/>
             </classpath>
@@ -21,17 +27,23 @@
     </target>
      
     <target name="build" depends="compile">
-        <copy todir="${classes.dir}">
+        <copy todir="${classes.dir}/main">
             <fileset dir="src/main/resources/"/>
         </copy>
         <copy todir="${web.dir}/WEB-INF/lib">
-            <fileset dir="${lib.dir}"/>
+            <fileset dir="${lib.dir}">
+                <include name="hibernate*.jar" />
+                <include name="postgresql*.jar" />
+                <include name="classmate*.jar" />
+                <include name="byte-buddy*.jar" />
+                <include name="antlr*.jar" />
+            </fileset>
         </copy>
             <war destfile = "${build.dir}/lab3.war" webxml = "${web.dir}/WEB-INF/web.xml">
                 <fileset dir = "${web.dir}">
                     <include name = "**/*.*"/>
                 </fileset>
-                <classes dir = "${classes.dir}"/>
+                <classes dir = "${classes.dir}/main" />
             </war>
         <delete dir="${web.dir}/WEB-INF/lib" />
     </target>
@@ -46,11 +58,11 @@
         <junit printsummary="true" haltonfailure="true">
             <classpath>
                 <path refid="classpath"/>
-                <pathelement location="${classes.dir}"/>
+                <pathelement location="${classes.dir}/test"/>
             </classpath>
             <formatter type="xml" usefile="true"/>
             <batchtest fork="yes" todir="test-reports">
-                <fileset dir="${classes.dir}" includes="**/*Test.class"/>
+                <fileset dir="${classes.dir}/test" includes="**/*Test.class"/>
             </batchtest>
         </junit>
     </target>
