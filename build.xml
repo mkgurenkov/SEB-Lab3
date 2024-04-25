@@ -5,13 +5,15 @@
     <property name="web.dir" location="${src.dir}/main/webapp"/>
     <property name="lib.dir" location="lib"/>
     
+   
+    
     <path id="classpath">
         <fileset dir="${lib.dir}" includes="**/*.jar"/>
     </path>
-    
+        
     <target name="compile">
         <mkdir dir="${classes.dir}"/>
-        <javac srcdir="${src.dir}" destdir="${classes.dir}" includeAntRuntime="false">
+        <javac target="17" source="17" srcdir="${src.dir}" destdir="${classes.dir}" includeAntRuntime="false">
             <classpath>
                 <path refid="classpath"/>
             </classpath>
@@ -19,27 +21,57 @@
     </target>
      
     <target name="build" depends="compile">
-        <war destfile = "lab3.war" webxml = "${web.dir}/WEB-INF/web.xml">
-            <fileset dir = "${web.dir}/web-content">
-                <include name = "**/*.*"/>
-            </fileset>      
-            <classes dir = "${classes.dir}"/>
-        </war>
+        <copy todir="${classes.dir}">
+            <fileset dir="src/main/resources/"/>
+        </copy>
+        <copy todir="${web.dir}/WEB-INF/lib">
+            <fileset dir="${lib.dir}"/>
+        </copy>
+            <war destfile = "${build.dir}/lab3.war" webxml = "${web.dir}/WEB-INF/web.xml">
+                <fileset dir = "${web.dir}">
+                    <include name = "**/*.*"/>
+                </fileset>
+                <classes dir = "${classes.dir}"/>
+            </war>
+        <delete dir="${web.dir}/WEB-INF/lib" />
     </target>
      
     <target name="clean">
-        <delete dir="${build.dir}"/>
+        <delete dir="${build.dir}" />
+        <delete dir="test-reports" />
     </target>
      
     <target name="test" depends="build">
-     
+        <mkdir dir="test-reports" />
+        <junit printsummary="true" haltonfailure="true">
+            <classpath>
+                <path refid="classpath"/>
+                <pathelement location="${classes.dir}"/>
+            </classpath>
+            <formatter type="xml" usefile="true"/>
+            <batchtest fork="yes" todir="test-reports">
+                <fileset dir="${classes.dir}" includes="**/*Test.class"/>
+            </batchtest>
+        </junit>
     </target>
+
      
     <target name="scp" depends="build">
-     
+        <scp file="${build.dir}/lab3.war" password="RiCj-2476" todir="s368069@helios.cs.ifmo.ru:~/wildfly-30.0.1.Final/standalone/deployments" port="2222" />
     </target>
      
     <target name="report" depends="test">
-     
+        <exec executable="git" dir="." failonerror="true">
+            <arg value="add"/>
+            <arg value="test-reports"/>
+        </exec>
+        <exec executable="git" dir="." failonerror="true">
+            <arg value="commit"/>
+            <arg value="-m"/>
+            <arg value="Upload test reports"/>
+        </exec>
+        <exec executable="git" dir="." failonerror="true">
+            <arg value="push"/>
+        </exec>
     </target>
 </project>
